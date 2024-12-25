@@ -23,4 +23,8 @@ export interface Product {
     xxl: number;
   };
   quantity: number;
+  // Add new fields to match API response
+  type_product: string;
+  category_product: string;
+  itemgroup_product: string;
 }

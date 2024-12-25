@@ -22,24 +22,22 @@ const ProductsSection = () => {
     queryFn: fetchAllProducts,
     select: (data) => {
       return data.filter((product: Product) => {
-        // If we're on a specific category path, apply filters
         if (pathSegments.length > 0) {
-          const [type, category, itemGroup] = pathSegments;
+          // Extract category information from URL
+          const categoryPath = pathSegments[0]; // e.g., "accessoires-sacamainfemme"
           
-          // Convert to lowercase for case-insensitive comparison
-          const productType = product.type_product.toLowerCase();
-          const productCategory = product.category_product.toLowerCase();
-          const productItemGroup = product.itemGroup.toLowerCase();
-          
+          // Split the category path into segments
+          const [type, category, itemGroup] = categoryPath.split('-').map(segment => 
+            segment.toLowerCase()
+          );
+
           // Match based on available path segments
-          const typeMatch = !type || productType === type.toLowerCase();
-          const categoryMatch = !category || productCategory === category.toLowerCase();
-          const itemGroupMatch = !itemGroup || productItemGroup === itemGroup.toLowerCase();
-          
+          const typeMatch = !type || product.type_product.toLowerCase() === type;
+          const categoryMatch = !category || product.category_product.toLowerCase() === category;
+          const itemGroupMatch = !itemGroup || product.itemgroup_product.toLowerCase() === itemGroup;
+
           return typeMatch && categoryMatch && itemGroupMatch;
         }
-        
-        // If no specific filters, return all products
         return true;
       });
     }

@@ -3,8 +3,6 @@ import { Product } from '../types/product';
 
 const BASE_URL = 'https://respizenmedical.com/fiori';
 
-export let currentRouteSegments: string[] = [];
-
 interface ApiResponse {
   status: string;
   count: number;
@@ -35,11 +33,6 @@ interface ApiResponse {
   }[];
 }
 
-export const setCurrentRouteSegments = (segments: string[]) => {
-  currentRouteSegments = segments;
-  console.log('Current Route Segments:', currentRouteSegments);
-};
-
 export const fetchAllProducts = async (): Promise<Product[]> => {
   try {
     const response = await axios.get<ApiResponse>(`${BASE_URL}/get_all_articles.php`);
@@ -49,7 +42,7 @@ export const fetchAllProducts = async (): Promise<Product[]> => {
         id: parseInt(product.id_product),
         name: product.nom_product,
         material: product.type_product,
-        color: product.category_product,
+        color: product.color_product,
         price: parseFloat(product.price_product),
         image: `${BASE_URL}/${product.img_product}`,
         image2: product.img2_product ? `${BASE_URL}/${product.img2_product}` : '',
@@ -70,6 +63,10 @@ export const fetchAllProducts = async (): Promise<Product[]> => {
           xxl: parseInt(product.xxl_size),
         },
         quantity: parseInt(product.qnty_product),
+        // Add the new fields
+        type_product: product.type_product,
+        category_product: product.category_product,
+        itemgroup_product: product.itemgroup_product,
       }));
     }
     throw new Error('Failed to fetch products');
