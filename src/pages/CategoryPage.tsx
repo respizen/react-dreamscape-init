@@ -13,13 +13,20 @@ const CategoryPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Extract the full path hierarchy
+  // Extract the full path hierarchy and format for display
   const pathSegments = location.pathname
     .split('/')
     .filter(segment => segment !== '' && segment !== 'category');
 
-  // Format the segment for display (replace hyphens with spaces and capitalize)
-  const formatSegment = (segment: string) => {
+  // Format breadcrumb segments
+  const formatBreadcrumb = (segment: string) => {
+    // Handle special cases first
+    if (segment === 'sacamainfemme') return 'Sacs à main';
+    if (segment === 'accessoires') return 'Accessoires';
+    if (segment === 'femmes') return 'Femmes';
+    if (segment === 'homme') return 'Hommes';
+
+    // General formatting
     return segment
       .split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -35,7 +42,7 @@ const CategoryPage = () => {
         <MainNavbarProduct />
       </div>
       <BeltsSection />
-      <br></br>
+      <br />
       <div className="flex-grow bg-[#F9FAFB]">
         <div className="container mx-auto px-4 py-4">
           <button
@@ -58,8 +65,14 @@ const CategoryPage = () => {
                   <li key={index}>
                     <div className="flex items-center">
                       <span className="mx-2.5 text-gray-400">/</span>
-                      <span className={index === pathSegments.length - 1 ? "text-primary font-medium" : "text-gray-700"}>
-                        {formatSegment(segment)}
+                      <span 
+                        className={
+                          index === pathSegments.length - 1 
+                            ? "text-primary font-medium" 
+                            : "text-gray-700"
+                        }
+                      >
+                        {formatBreadcrumb(segment)}
                       </span>
                     </div>
                   </li>

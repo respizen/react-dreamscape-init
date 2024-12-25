@@ -23,33 +23,50 @@ const ProductsSection = () => {
     select: (data) => {
       return data.filter((product: Product) => {
         if (pathSegments.length > 0) {
-          // Get the category path and normalize it
-          const categoryPath = pathSegments[0].toLowerCase(); // e.g., "accessoires-sacamainfemme"
-          
-          // Split the category path and handle special cases
-          let segments = categoryPath.split('-');
-          
-          // Handle special cases in the URL
-          if (segments[0] === 'accessoires' && segments[1] === 'sacamainfemme') {
-            return (
-              product.type_product.toLowerCase() === 'accessoires' &&
-              product.category_product.toLowerCase() === 'femmes' &&
-              product.itemgroup_product.toLowerCase() === 'sacs à main'
-            );
+          const categoryPath = pathSegments[0].toLowerCase();
+          const segments = categoryPath.split('-');
+
+          // Handle special cases for URLs
+          if (segments[0] === 'accessoires') {
+            if (segments[1] === 'sacamainfemme') {
+              return (
+                product.type_product.toLowerCase() === 'accessoires' &&
+                product.category_product.toLowerCase() === 'femmes' &&
+                product.itemgroup_product.toLowerCase() === 'sacs à main'
+              );
+            }
+            // Handle other accessory categories
+            const isAccessory = product.type_product.toLowerCase() === 'accessoires';
+            const matchesCategory = segments[1] === 'femmes' 
+              ? product.category_product.toLowerCase() === 'femmes'
+              : segments[1] === 'homme'
+              ? product.category_product.toLowerCase() === 'men'
+              : true;
+            
+            const itemGroup = segments[2] 
+              ? segments[2].replace('-', ' ').toLowerCase()
+              : null;
+            
+            return isAccessory && 
+                   matchesCategory && 
+                   (!itemGroup || product.itemgroup_product.toLowerCase() === itemGroup);
           }
 
-          // For other cases, try to match segments with product fields
-          const typeMatch = product.type_product.toLowerCase() === segments[0];
-          const categoryMatch = segments.length < 2 || 
-            product.category_product.toLowerCase() === (
-              segments[1] === 'femmes' ? 'femmes' : 
-              segments[1] === 'homme' ? 'men' : 
-              segments[1]
-            );
-          const itemGroupMatch = segments.length < 3 || 
-            product.itemgroup_product.toLowerCase() === segments[2].replace('-', ' ');
-
-          return typeMatch && categoryMatch && itemGroupMatch;
+          // Handle other product types
+          return segments.every((segment, index) => {
+            if (index === 0) return product.type_product.toLowerCase() === segment;
+            if (index === 1) {
+              return segment === 'femmes' 
+                ? product.category_product.toLowerCase() === 'femmes'
+                : segment === 'homme'
+                ? product.category_product.toLowerCase() === 'men'
+                : true;
+            }
+            if (index === 2) {
+              return product.itemgroup_product.toLowerCase() === segment.replace('-', ' ');
+            }
+            return true;
+          });
         }
         return true;
       });
