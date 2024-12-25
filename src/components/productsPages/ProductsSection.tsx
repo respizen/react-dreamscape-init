@@ -2,26 +2,46 @@ import React, { useState } from "react";
 import ProductCard from "../ProductCard";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAllProducts } from "../../services/productsApi";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { Skeleton } from "../ui/skeleton";
+import { Product } from "@/types/product";
 
 const ProductsSection = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const { category } = useParams();
+  const location = useLocation();
+
+  // Parse the path to get filter parameters
+  const pathSegments = location.pathname
+    .split('/')
+    .filter(segment => segment !== '' && segment !== 'category');
 
   const { data: products, isLoading, error } = useQuery({
-    queryKey: ['products', category],
+    queryKey: ['products', category, ...pathSegments],
     queryFn: fetchAllProducts,
     select: (data) => {
-      // Filter products based on category if needed
-      if (category) {
-        return data.filter(product => 
-          product.material.toLowerCase() === category.toLowerCase() ||
-          product.color.toLowerCase() === category.toLowerCase()
-        );
-      }
-      return data;
+      return data.filter((product: Product) => {
+        // If we're on a specific category path, apply filters
+        if (pathSegments.length > 0) {
+          const [type, category, itemGroup] = pathSegments;
+          
+          // Convert to lowercase for case-insensitive comparison
+          const productType = product.type_product.toLowerCase();
+          const productCategory = product.category_product.toLowerCase();
+          const productItemGroup = product.itemGroup.toLowerCase();
+          
+          // Match based on available path segments
+          const typeMatch = !type || productType === type.toLowerCase();
+          const categoryMatch = !category || productCategory === category.toLowerCase();
+          const itemGroupMatch = !itemGroup || productItemGroup === itemGroup.toLowerCase();
+          
+          return typeMatch && categoryMatch && itemGroupMatch;
+        }
+        
+        // If no specific filters, return all products
+        return true;
+      });
     }
   });
 
