@@ -23,18 +23,31 @@ const ProductsSection = () => {
     select: (data) => {
       return data.filter((product: Product) => {
         if (pathSegments.length > 0) {
-          // Extract category information from URL
-          const categoryPath = pathSegments[0]; // e.g., "accessoires-sacamainfemme"
+          // Get the category path and normalize it
+          const categoryPath = pathSegments[0].toLowerCase(); // e.g., "accessoires-sacamainfemme"
           
-          // Split the category path into segments
-          const [type, category, itemGroup] = categoryPath.split('-').map(segment => 
-            segment.toLowerCase()
-          );
+          // Split the category path and handle special cases
+          let segments = categoryPath.split('-');
+          
+          // Handle special cases in the URL
+          if (segments[0] === 'accessoires' && segments[1] === 'sacamainfemme') {
+            return (
+              product.type_product.toLowerCase() === 'accessoires' &&
+              product.category_product.toLowerCase() === 'femmes' &&
+              product.itemgroup_product.toLowerCase() === 'sacs à main'
+            );
+          }
 
-          // Match based on available path segments
-          const typeMatch = !type || product.type_product.toLowerCase() === type;
-          const categoryMatch = !category || product.category_product.toLowerCase() === category;
-          const itemGroupMatch = !itemGroup || product.itemgroup_product.toLowerCase() === itemGroup;
+          // For other cases, try to match segments with product fields
+          const typeMatch = product.type_product.toLowerCase() === segments[0];
+          const categoryMatch = segments.length < 2 || 
+            product.category_product.toLowerCase() === (
+              segments[1] === 'femmes' ? 'femmes' : 
+              segments[1] === 'homme' ? 'men' : 
+              segments[1]
+            );
+          const itemGroupMatch = segments.length < 3 || 
+            product.itemgroup_product.toLowerCase() === segments[2].replace('-', ' ');
 
           return typeMatch && categoryMatch && itemGroupMatch;
         }
